@@ -3,8 +3,12 @@
 #   "sqlmodel"
 # ]
 # ///
+import logging
 from sqlalchemy.schema import CreateSchema
 from sqlmodel import SQLModel, Field, create_engine, Session, select, text
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 class TestModel(SQLModel, table=True):
     __table_args__ = {'schema': 'per_user'}
@@ -26,4 +30,4 @@ if __name__ == '__main__':
 
     with Session(engine) as session:
         data = session.exec(select(TestModel.id))
-        print(data.all())
+        log.info(f'collected ids: {data.all()}')
