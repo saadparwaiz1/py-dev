@@ -1,3 +1,9 @@
+# /// script
+# dependencies = [
+#   "sqlmodel"
+# ]
+# ///
+from sqlalchemy.schema import CreateSchema
 from sqlmodel import SQLModel, Field, create_engine, Session, select, text
 
 class TestModel(SQLModel, table=True):
@@ -9,7 +15,10 @@ class TestModel(SQLModel, table=True):
 if __name__ == '__main__':
     engine = create_engine('sqlite://', echo=True)
     with engine.connect() as connect:
-        connect.execute(text("ATTACH DATABASE ':memory:' AS  per_user"))
+        if connect.dialect.has_schema(connect, 'per_user'):
+            connect.execute(CreateSchema('per_user'))
+        else:
+            connect.execute(text("ATTACH DATABASE ':memory:' AS  per_user"))
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         session.add_all([TestModel(), TestModel(), TestModel()])
